@@ -1,0 +1,89 @@
+*
+  box-sizing border-box
+
+html
+  margin 0
+  padding 0
+
+body
+  width 1050px
+  padding 40px 20px
+  margin auto
+
+a
+  cursor pointer
+  color inherit
+  text-decoration none
+
+  &:hover
+    text-decoration underline
+
+.button
+  display flex
+  justify-content center
+  margin 12px
+
+  button
+    width auto
+    font-size 105%
+
+.react-json-view .string-value
+  white-space pre-wrap
+  word-wrap break-word
+  word-break break-all
+  max-width 400px
+  display block
+
+nav
+  display flex
+  align-content center
+  align-items center
+  justify-content space-evenly
+
+  & > *
+    width 20%
+    text-align center
+    padding 0 10px
+    font-family monospace
+    word-break break-all
+
+    &:before
+      display block
+      text-align center
+
+  .header
+    font-size 120%
+    font-family sans-serif
+
+  .user-id:before
+    content 'user.id'
+
+  .user-balance:before
+    content 'free satoshis'
+
+  .user-offers:before
+    content 'open offers'
+
+  .user-tokens:before
+    content 'tokens'
+
+#game
+  width 600px
+
+  .wrapper, input
+    width 60%
+    margin 10px
+
+  .wrapper
+    display flex
+
+  svg
+    .board
+      fill #e39a6d
+
+  .info
+    white-space pre-wrap
+    font-family monospace
+
+.games
+  margin 20px
