@@ -21,8 +21,12 @@ function newbet ()
     error('amount must be positive')
   end
 
+  if __checkgame (gameid) ~= nil then
+    error('game already finished')
+  end
+
   -- save the remainder to this users' balance
-  local remainder = satoshis - amount * BETPRICE
+  local remainder = satoshis - (amount * BETPRICE)
   if remainder > 0 then
     local balance = state.balances[userid] or 0
     state.balances[userid] = balance + remainder
@@ -31,8 +35,8 @@ function newbet ()
   -- save tokens
   local bet = state.tokens[gameid] or {black={}, white={}}
   state.tokens[gameid] = bet
-  bet.black[userid] = bet.black[userid] + amount
-  bet.white[userid] = bet.white[userid] + amount
+  bet.black[userid] = (bet.black[userid] or 0) + amount
+  bet.white[userid] = (bet.white[userid] or 0) + amount
 end
 
 function selloffer ()
@@ -54,12 +58,17 @@ function selloffer ()
     error('amount must be positive')
   end
 
+  if __checkgame (gameid) ~= nil then
+    error('game already finished')
+  end
+
   -- remove tokens from this user/bet balance
   local bet = state.tokens[gameid]
-  if bet[winner][userid] < amount then
+  local current = bet[winner][userid] or 0
+  if current < amount then
     error("you can't sell more than you have")
   end
-  bet[winner][userid] = bet[winner][userid] - amount
+  bet[winner][userid] = current - amount
 
   -- put them in the offers
   local gameoffers = state.offers[gameid] or {}
@@ -89,33 +98,36 @@ function unoffer ()
     error('winner must be either black or white')
   end
 
-  local offers = gameoffers[gameid][winner]
-  for i = #offers, 1, -1 do
-    local offer = offers[i]
+  if __checkgame (gameid) ~= nil then
+    error('game already finished')
+  end
+
+  local gamewinneroffers = state.offers[gameid][winner]
+  for i, offer in ipairs(gamewinneroffers) do
     if offer.seller == userid then
-      table.remove(offers, i)
+      table.remove(gamewinneroffers, i)
+      state.tokens[gameid][winner][userid] = state.tokens[gameid][winner][userid] + offer.amount
     end
   end
 end
 
 function buyoffer ()
   local gameid = payload.gameid
-  local price = payload.price
   local winner = payload.winner
   local userid = payload.userid
   local maxprice = payload.maxprice
-
-  if userid ~= util.sha256(payload._key) then
-    error("_key doesn't match")
-  end
 
   if winner ~= 'black' and winner ~= 'white' then
     error('winner must be either black or white')
   end
 
+  if __checkgame (gameid) ~= nil then
+    error('game already finished')
+  end
+
   local input = satoshis
   local bought = 0
-  local offers = gameoffers[gameid][winner]
+  local offers = state.offers[gameid][winner]
 
   for _, offer in ipairs(offers) do
     -- determine if we're going to stop buying
@@ -124,11 +136,12 @@ function buyoffer ()
     end
 
     -- determine how much of this offer we're going to take
-    local quantity = math.floor(input / price)
+    local quantity = math.floor(input / offer.price)
     if quantity > offer.amount then
       -- take all
       quantity = offer.amount
     end
+    bought = bought + quantity
 
     -- adjust
     -- -- remaining input money
@@ -139,8 +152,7 @@ function buyoffer ()
     -- -- buyer tokens
     local bet = state.tokens[gameid] or {black={}, white={}}
     state.tokens[gameid] = bet
-    bet.black[userid] = bet.black[userid] + quantity
-    bet.white[userid] = bet.white[userid] + quantity
+    bet[winner][userid] = (bet[winner][userid] or 0) + quantity
     -- -- this offer
     offer.amount = offer.amount - quantity
   end
@@ -172,23 +184,23 @@ function redeem ()
     error('unknown game, perhaps it was already redeemed.')
   end
 
-  local game = http.getjson("https://online-go.com/api/v1/games/" .. gameid, {
-    Accept='application/json'
-  })
-
-  if game.gamedata.phase ~= 'finished' then
+  winner = __checkgame(gameid)
+  if winner == nil then
     error("game not yet finished")
   end
 
-  local winner
-  if game.black_lost and not game.white_lost then
-    winner = 'white'
-  elseif game.white_lost and not game.black_lost then
-    winner = 'black'
-  else
-    error('this game is in an odd state in which both players won? or lost?')
+  -- close all open offers for the winner
+  -- (for the loser we can just ignore and delete in the next step)
+  local gamewinneroffers = state.offers[gameid] or {}
+  for i, offer in ipairs(gamewinneroffers) do
+    state.tokens[gameid][winner][offer.seller] = state.tokens[gameid][winner][offer.seller] + offer.amount
   end
 
+  -- then delete the offer container for this game
+  state.offers[gameid] = nil
+
+  -- redeem
+  local bet = state.tokens[gameid]
   for userid, quantity in pairs(bet[winner]) do
     local redeemable = (quantity or 0) * BETPRICE
 
@@ -207,8 +219,33 @@ function withdraw ()
   end
 
   local balance = state.balances[userid] or 0
-  local _, err = ln.pay(payload._invoice, {max=balance})
+  local msatspaid, err = ln.pay(payload._invoice, {max=balance})
   if err ~= nil then
-    error('invoice is greater than balance')
+    error('invalid invoice: ' .. err)
   end
+
+  state.balances[userid] = state.balances[userid] - msatspaid/1000
+end
+
+function __checkgame (gameid) -- returns winner, which is nil if the game isn't finished
+  local game, err = http.getjson("https://online-go.com/api/v1/games/" .. gameid, {
+    Accept='application/json'
+  })
+
+  if err ~= nil then
+    error("game doesn't exist")
+  end
+
+  if game.gamedata.phase ~= 'finished' then
+    return nil
+  end
+
+  local winner
+  if game.black_lost and not game.white_lost then
+    winner = 'white'
+  elseif game.white_lost and not game.black_lost then
+    winner = 'black'
+  end
+
+  return winner
 end
