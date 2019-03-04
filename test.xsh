@@ -79,21 +79,17 @@ assert state['tokens'][gameid]['black'] == {id1: 1, id2: 15}
 
 print('fail to withdraw more than the balance')
 payload = json.dumps({'userid': id2, '_key': key2, '_invoice': withdraw_toomuch})
-try:
-    r = !(run --contract contract.lua --method withdraw  --payload @(payload) --state @(jsonstate))
-    after(r)
+r = !(run --contract contract.lua --method withdraw  --payload @(payload) --state @(jsonstate))
+if r:
     fail('call should have errored')
-except subprocess.CalledProcessError:
-    pass
+print('')
 
 print('fail to withdraw with an invalid key')
 payload = json.dumps({'userid': id2, '_key': 'abc', '_invoice': withdraw_10})
-try:
-    r = !(run --contract contract.lua --method withdraw  --payload @(payload) --state @(jsonstate))
-    after(r)
+r = !(run --contract contract.lua --method withdraw  --payload @(payload) --state @(jsonstate))
+if r:
     fail('call should have errored')
-except subprocess.CalledProcessError:
-    pass
+print('')
 
 print('withdraw with a valid key')
 payload = json.dumps({'userid': id2, '_key': key2, '_invoice': withdraw_10})
@@ -103,29 +99,24 @@ assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4, id2: 43 - (4*9 + 5*
 
 print('try to open an offer with more tokens than owned')
 payload = json.dumps({'gameid': gameid, 'userid': id1, '_key': key1, 'amount': 8, 'price': 6, 'winner': 'black'})
-try:
-    r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gamerunning))
-    after(r)
+r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gamerunning))
+if r:
     fail('call should have errored')
-except subprocess.CalledProcessError:
-    pass
+print('')
 
 print('try to open an offer after the game has finished')
 payload = json.dumps({'gameid': gameid, 'userid': id1, '_key': key1, 'amount': 1, 'price': 10, 'winner': 'black'})
-try:
-    r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gameended))
-    after(r)
+r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gameended))
+if r:
     fail('call should have errored')
-except subprocess.CalledProcessError:
-    pass
+print('')
 
 print('try to buy an offer after the game has finished')
 payload = json.dumps({'gameid': gameid, 'userid': id2, 'maxprice': 100, 'winner': 'white'})
-try:
-    r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=200 --http @(gameended))
-    after(r)
-except subprocess.CalledProcessError:
-    pass
+r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=200 --http @(gameended))
+if r:
+    fail('call should have errored')
+print('')
 
 print('redeem')
 payload = json.dumps({'gameid': gameid})
