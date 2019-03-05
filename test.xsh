@@ -65,17 +65,21 @@ print('buy some of the offers with another user (contrained by money)')
 payload = json.dumps({'gameid': gameid, 'userid': id2, 'maxprice': 10, 'winner': 'black'})
 r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=43 --http @(gamerunning))
 after(r)
-assert state['balances'] == {id1: 7 + 4*9 + 5*1, id2: 43 - (4*9 + 5*1)}
+assert state['balances'] == {id1: 7 + 4*9 + 5*1,
+                             id2: 43 - (4*9 + 5*1)}
 assert state['offers'][gameid]['black'] == [{'amount': 1, 'price': 5, 'seller': id1}, {'amount': 4, 'price': 6, 'seller': id1}, {'amount': 4, 'price': 7, 'seller': id1}]
-assert state['tokens'][gameid]['black'] == {id1: 1, id2: 10}
+assert state['tokens'][gameid]['black'] == {id1: 1,
+                                            id2: 10}
 
 print('buy some of the offers with another user (contrained by maxprice)')
 payload = json.dumps({'gameid': gameid, 'userid': id2, 'maxprice': 6, 'winner': 'black'})
 r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=200 --http @(gamerunning))
 after(r)
-assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4, id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4)}
+assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4,
+                             id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4)}
 assert state['offers'][gameid]['black'] == [{'amount': 4, 'price': 7, 'seller': id1}]
-assert state['tokens'][gameid]['black'] == {id1: 1, id2: 15}
+assert state['tokens'][gameid]['black'] == {id1: 1,
+                                            id2: 15}
 
 print('fail to withdraw more than the balance')
 payload = json.dumps({'userid': id2, '_key': key2, '_invoice': withdraw_toomuch})
@@ -95,7 +99,8 @@ print('withdraw with a valid key')
 payload = json.dumps({'userid': id2, '_key': key2, '_invoice': withdraw_10})
 r = !(run --contract contract.lua --method withdraw  --payload @(payload) --state @(jsonstate) --funds 100000000)
 after(r)
-assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4, id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4) - 10}
+assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4,
+                             id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4) - 10}
 
 print('try to open an offer with more tokens than owned')
 payload = json.dumps({'gameid': gameid, 'userid': id1, '_key': key1, 'amount': 8, 'price': 6, 'winner': 'black'})
@@ -122,6 +127,7 @@ print('redeem')
 payload = json.dumps({'gameid': gameid})
 r = !(run --contract contract.lua --method redeem --payload @(payload) --state @(jsonstate) --http @(gameended))
 after(r)
-assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4 + 1*10, id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4) - 10 + 15*10}
+assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4 + 1*10 + 4*10,
+                             id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4) - 10 + 15*10}
 assert state['offers'] == {}
 assert state['tokens'] == {}

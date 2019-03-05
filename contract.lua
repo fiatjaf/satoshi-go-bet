@@ -191,9 +191,10 @@ function redeem ()
 
   -- close all open offers for the winner
   -- (for the loser we can just ignore and delete in the next step)
-  local gamewinneroffers = state.offers[gameid] or {}
-  for i, offer in ipairs(gamewinneroffers) do
-    state.tokens[gameid][winner][offer.seller] = state.tokens[gameid][winner][offer.seller] + offer.amount
+  local gameoffers = state.offers[gameid] or {[winner]={}}
+  for i, offer in ipairs(gameoffers[winner]) do
+    local currenttokens = state.tokens[gameid][winner][offer.seller] or 0
+    state.tokens[gameid][winner][offer.seller] = currenttokens + offer.amount
   end
 
   -- then delete the offer container for this game
