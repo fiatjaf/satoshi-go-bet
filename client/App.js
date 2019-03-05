@@ -176,6 +176,19 @@ function App() {
         <div id="user">
           <h2>Your stuff</h2>
           <div>
+            <h4>your tokens</h4>
+            {userTokens.length === 0
+              ? 'none'
+              : userTokens.map(({amount, gameid, winner}, i) => (
+                  <div key={i}>
+                    {amount} on {winner}@
+                    <a data-gameid={gameid} onClick={handleGameClick}>
+                      {gameid}
+                    </a>{' '}
+                  </div>
+                ))}
+          </div>
+          <div>
             <h4>your offers</h4>
             {userOffers.length === 0
               ? 'none'
@@ -191,28 +204,18 @@ function App() {
                 ))}
           </div>
           <div>
-            <h4>your tokens</h4>
-            {userTokens.length === 0
-              ? 'none'
-              : userTokens.map(({amount, gameid, winner}, i) => (
-                  <div key={i}>
-                    {amount} on {winner}@
-                    <a data-gameid={gameid} onClick={handleGameClick}>
-                      {gameid}
-                    </a>{' '}
-                  </div>
-                ))}
+            <h4>Disclaimer</h4>
+            <p>
+              This website is just a client for the{' '}
+              <a
+                href={`${window.etleneum}/contract/${window.contract}`}
+                target="_blank"
+              >
+                {window.contract} Etleneum contract
+              </a>
+              . If something goes wrong we can't do anything, code is law.
+            </p>
           </div>
-          <p>
-            This website is just a client for the{' '}
-            <a
-              href={`${window.etleneum}/contract/${window.contract}`}
-              target="_blank"
-            >
-              {window.contract} Etleneum contract
-            </a>
-            . If something goes wrong we can't do anything, code is law.
-          </p>
         </div>
       </main>
     </div>

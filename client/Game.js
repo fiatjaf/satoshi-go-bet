@@ -16,6 +16,11 @@ for (let i = 0; i < 19; i++) {
 }
 // ~
 
+const OPENING_BET = 'OPENING_BET'
+const MAKING_OFFER_FOR = 'MAKING_OFFER_FOR'
+const BUYING_OFFER_FOR = 'BUYING_OFFER_FOR'
+const NONE = 'NONE'
+
 export default function Game({
   selectedGame,
   setSelectedGame,
@@ -25,15 +30,11 @@ export default function Game({
   setContractState,
   showInvoice
 }) {
-  let [makingOfferFor, setMakingOffer] = useState(null)
-  let [buyingOfferFor, setBuyingOffer] = useState(null)
-  let [openingBet, setOpeningBet] = useState(false)
+  let [action, setAction] = useState({action: NONE})
 
   useEffect(
     () => {
-      setMakingOffer(null)
-      setBuyingOffer(null)
-      setOpeningBet(false)
+      setAction({action: NONE})
     },
     [selectedGame]
   )
@@ -66,7 +67,7 @@ export default function Game({
 
   function handleStartOpeningBet(e) {
     e.preventDefault()
-    setOpeningBet(true)
+    setAction({action: OPENING_BET})
   }
 
   async function handleOpenBet(e) {
@@ -101,7 +102,7 @@ export default function Game({
 
   function handleStartMakingOffer(e) {
     e.preventDefault()
-    setMakingOffer(e.target.dataset.winner)
+    setAction({action: MAKING_OFFER_FOR, winner: e.target.dataset.winner})
   }
 
   async function handleMakeOffer(e) {
@@ -113,7 +114,7 @@ export default function Game({
         0,
         {
           gameid: getGameId(selectedGame),
-          winner: makingOfferFor,
+          winner: action.winner,
           price: e.target.price.value,
           amount: e.target.amount.value,
           userid: user.id,
@@ -126,13 +127,37 @@ export default function Game({
     } catch (e) {}
   }
 
+  async function handleUnoffer(e) {
+    e.preventDefault()
+
+    let gameid = getGameId(selectedGame)
+    let winner = e.target.dataset.winner
+
+    try {
+      await makeCall(
+        'unoffer',
+        0,
+        {
+          gameid,
+          winner,
+          userid: user.id,
+          _key: user.key
+        },
+        {showInvoice}
+      )
+      toast.success(`Offers for ${winner}@${gameid} were removed.`)
+      setContractState(await loadContract())
+    } catch (e) {}
+  }
+
   function handleStartBuyingOffer(e) {
     e.preventDefault()
-    setBuyingOffer(e.target.dataset.winner)
+    setAction({action: BUYING_OFFER_FOR, winner: e.target.dataset.winner})
   }
 
   async function handleBuyOffer(e) {
     e.preventDefault()
+    let winner = action.winner
 
     try {
       let {bought, spent} = await makeCall(
@@ -140,14 +165,14 @@ export default function Game({
         parseInt(e.target.satoshis.value),
         {
           gameid: getGameId(selectedGame),
-          winner: buyingOfferFor,
+          winner,
           maxprice: e.target.maxprice.value,
           userid: user.id
         },
         {showInvoice}
       )
       toast.success(
-        `Bought ${bought} ${buyingOfferFor} tokens for a total of ${spent} satoshis.`
+        `Bought ${bought} ${winner} tokens for a total of ${spent} satoshis.`
       )
       setContractState(await loadContract())
     } catch (e) {}
@@ -208,9 +233,21 @@ export default function Game({
               <strong>your tokens</strong>
               {['black', 'white'].map(winner => (
                 <div key={winner}>
-                  {winner}: {selectedGameData.userTokens[winner]}
+                  <span>
+                    {winner}: {selectedGameData.userTokens[winner]}
+                    {selectedGameData.userTotalOffered[winner] > 0 ? (
+                      <>
+                        {' '}
+                        ({selectedGameData.userTotalOffered[winner]})
+                        <button data-winner={winner} onClick={handleUnoffer}>
+                          unoffer
+                        </button>
+                      </>
+                    ) : null}
+                  </span>
                   {selectedGameData.status === 'play' ? (
-                    makingOfferFor === winner ? (
+                    action.action === MAKING_OFFER_FOR &&
+                    action.winner === winner ? (
                       <form onSubmit={handleMakeOffer}>
                         <label>
                           amount
@@ -252,7 +289,7 @@ export default function Game({
                 </div>
               ))}
               {selectedGameData.status === 'play' ? (
-                openingBet ? (
+                action.action === OPENING_BET ? (
                   <form onSubmit={handleOpenBet}>
                     <label>
                       satoshis to spend
@@ -284,7 +321,8 @@ export default function Game({
                           )
                         )}
                         {selectedGameData.status === 'play' ? (
-                          buyingOfferFor === winner ? (
+                          action.action === BUYING_OFFER_FOR &&
+                          action.winner === winner ? (
                             <form onSubmit={handleBuyOffer}>
                               <label>
                                 maxprice
@@ -370,6 +408,14 @@ export async function fetchGame(contractState, gameURL) {
     userTokens: {
       black: get(contractState, ['tokens', game.id, 'black', user.id]) || 0,
       white: get(contractState, ['tokens', game.id, 'white', user.id]) || 0
+    },
+    userTotalOffered: {
+      black: (get(contractState, ['offers', game.id, 'black']) || [])
+        .filter(o => o.seller === user.id)
+        .reduce((acc, o) => acc + o.amount, 0),
+      white: (get(contractState, ['offers', game.id, 'white']) || [])
+        .filter(o => o.seller === user.id)
+        .reduce((acc, o) => acc + o.amount, 0)
     }
   }
 }
