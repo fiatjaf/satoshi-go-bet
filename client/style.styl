@@ -4,6 +4,7 @@
 html
   margin 0
   padding 0
+  font-family monospace
 
 body
   width 1050px
@@ -13,10 +14,18 @@ body
 a
   cursor pointer
   color inherit
-  text-decoration none
+  text-decoration underline
 
   &:hover
     text-decoration underline
+
+label
+  display inline-block
+  color gray
+
+h1, h2, h3, h4, h5, h6
+  margin-top 4px
+  margin-bottom 2px
 
 .button
   display flex
@@ -34,6 +43,31 @@ a
   max-width 400px
   display block
 
+#invoice, #paste-invoice
+  position fixed
+  background white
+  display flex
+  flex-direction column
+  justify-content center
+  align-items center
+  top 0
+  left 0
+  bottom 0
+  right 0
+
+  .controls
+    display flex
+    justify-content center
+    align-items center
+
+  textarea
+    width 400px
+    height 300px
+
+  button
+    padding 7px
+    margin 17px
+
 nav
   display flex
   align-content center
@@ -44,7 +78,6 @@ nav
     width 20%
     text-align center
     padding 0 10px
-    font-family monospace
     word-break break-all
 
     &:before
@@ -53,7 +86,6 @@ nav
 
   .header
     font-size 120%
-    font-family sans-serif
 
   .user-id:before
     content 'user.id'
@@ -67,23 +99,59 @@ nav
   .user-tokens:before
     content 'tokens'
 
-#game
-  width 600px
+main
+  display flex
 
-  .wrapper, input
-    width 60%
-    margin 10px
+  @media (max-width 700px)
+    display block
+
+    & > *
+      width 100%
+
+#game
+  flex-grow 3
+
+  .game-input
+    display flex
+    justify-content center
+
+    & > *
+      margin 10px
+      display block
+
+    button
+      padding 3px 15px
 
   .wrapper
+    width 100%
+    margin 10px
     display flex
 
   svg
+    width 67%
+
     .board
       fill #e39a6d
 
   .info
+    margin-left 5px
     white-space pre-wrap
-    font-family monospace
+
+    button
+      max-width 100%
+      padding 0
+
+    input
+      max-width 77px
+
+    form button
+      display block
 
 .games
   margin 20px
+
+#global
+  flex-shrink 2
+
+#user
+  flex-shrink 2

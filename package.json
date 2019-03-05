@@ -28,12 +28,13 @@
   "dependencies": {
     "browserify-incremental": "^3.1.1",
     "just-clone": "^3.1.0",
-    "memoize-one": "^5.0.0",
+    "just-safe-get": "^1.3.0",
     "react": "16.8.3",
     "react-dom": "16.8.3",
     "react-goban-svg": "^0.1.0",
     "react-qr-svg": "^2.1.0",
     "sha.js": "^2.4.11",
+    "toastify-js": "github:fiatjaf/toastify-js#ae5b1359a27b3052412fa022d27da44b0a589808",
     "uuid": "^3.3.2"
   }
 }
