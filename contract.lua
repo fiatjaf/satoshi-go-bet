@@ -99,7 +99,7 @@ function unoffer ()
   end
 
   if __checkgame (gameid) ~= nil then
-    error('game already finished')
+    error('game already finished (you can just call redeem now)')
   end
 
   local gamewinneroffers = state.offers[gameid][winner]
@@ -109,6 +109,8 @@ function unoffer ()
       state.tokens[gameid][winner][userid] = state.tokens[gameid][winner][userid] + offer.amount
     end
   end
+
+  _offerscleanup()
 end
 
 function buyoffer ()
@@ -170,6 +172,8 @@ function buyoffer ()
     local balance = state.balances[userid] or 0
     state.balances[userid] = balance + input
   end
+
+  _offerscleanup()
 
   local spent = (satoshis-input)
   return {bought=bought, spent=spent}
@@ -249,4 +253,14 @@ function __checkgame (gameid) -- returns winner, which is nil if the game isn't 
   end
 
   return winner
+end
+
+function _offerscleanup () -- if some offer array is empty, delete it
+  for gameid, gameoffers in pairs(state.offers) do
+    for winner, offerarray in pairs(state.offers[gameid]) do
+      if #offerarray == 0 then
+        state.offers[gameid][winner] = nil
+      end
+    end
+  end
 end

@@ -61,6 +61,15 @@ assert state['offers'][gameid]['black'] == [{'amount': 9, 'price': 4, 'seller': 
 assert state['offers'][gameid]['white'] == [{'amount': 10, 'price': 9, 'seller': id1}]
 assert state['tokens'][gameid] == {'black': {id1: 1}, 'white': {id1: 10}}
 
+print('remove the white offer then redo it')
+payload = json.dumps({'gameid': gameid, 'userid': id1, '_key': key1, 'winner': 'white'})
+r = !(run --contract contract.lua --method unoffer --payload @(payload) --state @(jsonstate) --http @(gamerunning))
+after(r)
+assert 'white' not in state['offers'][gameid]
+payload = json.dumps({'gameid': gameid, 'userid': id1, '_key': key1, 'amount': 10, 'price': 9, 'winner': 'white'})
+r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gamerunning))
+after(r)
+
 print('buy some of the offers with another user (contrained by money)')
 payload = json.dumps({'gameid': gameid, 'userid': id2, 'maxprice': 10, 'winner': 'black'})
 r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=43 --http @(gamerunning))
