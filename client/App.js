@@ -222,4 +222,7 @@ function App() {
   )
 }
 
+window.etleneum = process.env.ETLENEUM_URL
+window.contract = process.env.CONTRACT_ID
+
 render(<App />, document.getElementById('app'))

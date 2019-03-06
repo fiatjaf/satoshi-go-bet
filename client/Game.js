@@ -239,9 +239,11 @@ export default function Game({
                       <>
                         {' '}
                         ({selectedGameData.userTotalOffered[winner]})
-                        <button data-winner={winner} onClick={handleUnoffer}>
-                          unoffer
-                        </button>
+                        {selectedGameData.status === 'finished' ? (
+                          <button data-winner={winner} onClick={handleUnoffer}>
+                            unoffer
+                          </button>
+                        ) : null}
                       </>
                     ) : null}
                   </span>
@@ -272,7 +274,7 @@ export default function Game({
                             defaultValue="5"
                           />
                         </label>
-                        <button>open offer</button>
+                        <button>make offer</button>
                       </form>
                     ) : selectedGameData.userTokens[winner] ? (
                       <>
@@ -288,6 +290,7 @@ export default function Game({
                   ) : null}
                 </div>
               ))}
+              <br />
               {selectedGameData.status === 'play' ? (
                 action.action === OPENING_BET ? (
                   <form onSubmit={handleOpenBet}>
