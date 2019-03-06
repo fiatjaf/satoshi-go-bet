@@ -18,6 +18,7 @@ export default function Invoice({invoice, onPaid, hide}) {
     <div id="invoice">
       <p>Pay the following invoice to make this call:</p>
       <QRCode level="Q" style={{width: 512}} value={invoice} />
+      <pre>{invoice}</pre>
       <div className="controls">
         <button onClick={stopShowing}>Cancel</button>
         <button onClick={handlePaid}>Paid!</button>
