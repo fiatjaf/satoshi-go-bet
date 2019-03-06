@@ -2,6 +2,7 @@
 
 import React, {useState, useEffect} from 'react'
 import {render} from 'react-dom'
+import humanizeDuration from 'humanize-duration'
 
 import user from './user'
 import * as toast from './toast'
@@ -17,7 +18,21 @@ import Game, {fetchGame} from './Game'
 import Invoice from './Invoice'
 import PasteInvoice from './PasteInvoice'
 
-const initialGame = localStorage.getItem('gameid') || '16849624'
+const duration = humanizeDuration.humanizer({
+  language: 'shortEn',
+  languages: {
+    shortEn: {
+      y: () => 'y',
+      mo: () => 'mo',
+      w: () => 'w',
+      d: () => 'd',
+      h: () => 'h',
+      m: () => 'm',
+      s: () => 's',
+      ms: () => 'ms'
+    }
+  }
+})
 
 function App() {
   let [contractState, setContractState] = useState({
@@ -25,10 +40,13 @@ function App() {
     offers: {},
     balances: {}
   })
-  let [selectedGame, setSelectedGame] = useState(initialGame)
+  let [selectedGame, setSelectedGame] = useState(
+    sessionStorage.getItem('gameid') || ''
+  )
   let [selectedGameData, setSelectedGameData] = useState()
   let [showingInvoice, showInvoice] = useState(null)
   let [showingPasteInvoice, showPasteInvoice] = useState(null)
+  let [gamesList, setGamesList] = useState([])
 
   let userBalance = contractState.balances[user.id] || 0
   let userOffers = getUserOffers(contractState, user.id)
@@ -39,7 +57,7 @@ function App() {
   useEffect(
     () => {
       if (selectedGameData) {
-        localStorage.setItem('gameid', selectedGameData.id)
+        sessionStorage.setItem('gameid', selectedGameData.id)
       }
     },
     [selectedGameData]
@@ -47,13 +65,38 @@ function App() {
 
   useEffect(
     () => {
-      fetchGame(contractState, initialGame).then(setSelectedGameData)
+      if (selectedGame.length) {
+        fetchGame(contractState, selectedGame).then(setSelectedGameData)
+      }
     },
     [contractState]
   )
 
   useEffect(() => {
     loadContract().then(setContractState)
+  }, [])
+
+  useEffect(() => {
+    const ws = new WebSocket(
+      'wss://online-go.com/socket.io/?EIO=3&transport=websocket'
+    )
+    ws.onmessage = ({data}) => {
+      if (data.slice(0, 4) === '430[') {
+        let list = JSON.parse(data.slice(3))[0].results
+        if (list.length !== 0) {
+          setGamesList(list)
+          setSelectedGame(list[0].id)
+          fetchGame(contractState, list[0].id).then(setSelectedGameData)
+          ws.close()
+        }
+      }
+    }
+
+    ws.onopen = () => {
+      ws.send(
+        '420["gamelist/query",{"list":"corr","sort_by":"rank","from":-9,"limit":9}]'
+      )
+    }
   }, [])
 
   async function handleGameClick(e) {
@@ -170,6 +213,25 @@ function App() {
                       </div>
                     </div>
                   ))}
+            </div>
+          </div>
+          <div>
+            <h3>some available games</h3>
+            <div>
+              {gamesList.map(game => (
+                <div key={game.id}>
+                  <a data-gameid={game.id} onClick={handleGameClick}>
+                    {game.white.username} x {game.black.username}
+                  </a>{' '}
+                  on move {game.move_number} with{' '}
+                  {duration(game.time_per_move * 1000, {
+                    largest: 1,
+                    round: true,
+                    spacer: ''
+                  })}{' '}
+                  per move
+                </div>
+              ))}
             </div>
           </div>
         </div>
