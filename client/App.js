@@ -14,7 +14,7 @@ import {
   getAllTokens,
   makeCall
 } from './contract'
-import Game, {fetchGame} from './Game'
+import Game from './Game'
 import Invoice from './Invoice'
 import PasteInvoice from './PasteInvoice'
 
@@ -43,7 +43,6 @@ function App() {
   let [selectedGame, setSelectedGame] = useState(
     sessionStorage.getItem('gameid') || ''
   )
-  let [selectedGameData, setSelectedGameData] = useState()
   let [showingInvoice, showInvoice] = useState(null)
   let [showingPasteInvoice, showPasteInvoice] = useState(null)
   let [gamesList, setGamesList] = useState([])
@@ -54,29 +53,13 @@ function App() {
   let allOffers = getAllOffers(contractState)
   let allTokens = getAllTokens(contractState)
 
-  useEffect(
-    () => {
-      if (selectedGameData) {
-        sessionStorage.setItem('gameid', selectedGameData.id)
-      }
-    },
-    [selectedGameData]
-  )
-
-  useEffect(
-    () => {
-      if (selectedGame.length) {
-        fetchGame(contractState, selectedGame).then(setSelectedGameData)
-      }
-    },
-    [contractState]
-  )
-
   useEffect(() => {
     loadContract().then(setContractState)
   }, [])
 
   useEffect(() => {
+    if (gamesList.length > 0) return // only fetch this once ever
+
     const ws = new WebSocket(
       'wss://online-go.com/socket.io/?EIO=3&transport=websocket'
     )
@@ -85,8 +68,9 @@ function App() {
         let list = JSON.parse(data.slice(3))[0].results
         if (list.length !== 0) {
           setGamesList(list)
-          setSelectedGame(list[0].id)
-          fetchGame(contractState, list[0].id).then(setSelectedGameData)
+          if (!selectedGame) {
+            setSelectedGame(list[0].id)
+          }
           ws.close()
         }
       }
@@ -102,7 +86,6 @@ function App() {
   async function handleGameClick(e) {
     e.preventDefault()
     setSelectedGame(e.target.dataset.gameid)
-    setSelectedGameData(await fetchGame(contractState, e.target.dataset.gameid))
   }
 
   async function handleWithdraw(e) {
@@ -137,8 +120,6 @@ function App() {
         <Game
           selectedGame={selectedGame}
           setSelectedGame={setSelectedGame}
-          selectedGameData={selectedGameData}
-          setSelectedGameData={setSelectedGameData}
           contractState={contractState}
           showInvoice={showInvoice}
           setContractState={setContractState}

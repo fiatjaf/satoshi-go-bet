@@ -36,6 +36,7 @@
     "react-qr-svg": "^2.1.0",
     "sha.js": "^2.4.11",
     "toastify-js": "github:fiatjaf/toastify-js#ae5b1359a27b3052412fa022d27da44b0a589808",
+    "use-debounce": "^1.0.0",
     "uuid": "^3.3.2"
   }
 }
