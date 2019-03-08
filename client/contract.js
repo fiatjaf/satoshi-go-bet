@@ -22,7 +22,7 @@ export async function makeCall(
   {showInvoice, invoiceAt, showPasteInvoice}
 ) {
   if (invoiceAt) {
-    let invoice = await new Promise((resolve, reject) => {
+    let invoice = await new Promise(resolve => {
       showPasteInvoice({
         onPasted: pasted => {
           showPasteInvoice(null)
@@ -50,7 +50,7 @@ export async function makeCall(
 
   let {id: callid, invoice} = (await r.json()).value
 
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     showInvoice({
       invoice,
       onPaid: async () => {
@@ -59,7 +59,6 @@ export async function makeCall(
         })
         if (!r.ok) {
           toast.error((await r.json()).error)
-          reject()
           return
         }
 
