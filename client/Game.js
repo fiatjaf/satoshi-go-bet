@@ -389,10 +389,10 @@ export default function Game({
                   )
                 ) : null}
               </div>
-              <br />
               <div>
                 {['black', 'white'].map(winner => (
                   <div key={winner}>
+                    <br />
                     <strong>{winner} open offers</strong>
                     <div>
                       {contractGameData.offers[winner] &&

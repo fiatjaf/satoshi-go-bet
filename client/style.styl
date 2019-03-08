@@ -5,12 +5,13 @@ html
   margin 0
   padding 0
   font-family monospace
+  background-color #e39a6d
 
 body
   width 1050px
   max-width 100%
-  padding 40px 20px
-  margin auto
+  margin 40px auto
+  background white
 
 a
   cursor pointer
@@ -31,6 +32,10 @@ button
 h1, h2, h3, h4, h5, h6
   margin-top 4px
   margin-bottom 2px
+
+ul
+  list-style circle inside
+  padding 0
 
 .react-json-view .string-value
   white-space pre-wrap
@@ -74,12 +79,15 @@ nav
   align-content center
   align-items center
   justify-content space-evenly
+  background #efe4e4
+  padding 20px
 
   & > *
     width 20%
     text-align center
     padding 0 10px
-    word-break break-all
+    word-wrap break-word
+    word-wrap anywhere
 
     &:before
       display block
@@ -87,6 +95,8 @@ nav
 
   .header
     font-size 120%
+    font-weight bold
+    font-family 'Open Sans', sans-serif
 
   .user-id:before
     content 'user.id'
@@ -103,6 +113,9 @@ nav
 main
   display flex
   justify-content space-between
+
+  & > *
+    padding 0 10px 10px 10px
 
   @media (max-width 700px)
     display block
@@ -157,3 +170,4 @@ main
 
 #user
   flex-shrink 2
+  background #efe4e4

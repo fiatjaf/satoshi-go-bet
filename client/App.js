@@ -134,7 +134,7 @@ function App() {
           </p>
           <h2>Global stuff</h2>
           <div>
-            <h3>all offers</h3>
+            <h3>All offers</h3>
             <div>
               {Object.keys(allOffers).length === 0
                 ? 'none'
@@ -145,62 +145,34 @@ function App() {
                           game {gameid}
                         </a>
                       </h4>
-                      <div>
-                        {['black', 'white'].map(winner => (
-                          <div key={winner}>
-                            {allOffers[gameid][winner] &&
+                      <ul>
+                        {['black', 'white'].map(
+                          winner =>
+                            allOffers[gameid][winner] &&
                             allOffers[gameid][winner].length !== 0 ? (
                               <>
                                 <h5>{winner}</h5>
                                 {allOffers[gameid][winner].map(
                                   ({amount, price, seller}, i) => (
-                                    <div key={i}>
-                                      {amount} at {price}
+                                    <li key={i}>
+                                      {amount} for {winner} at {price}
                                       sats from {seller.slice(0, 4)}…
-                                    </div>
+                                    </li>
                                   )
                                 )}{' '}
                               </>
-                            ) : (
-                              'none'
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                            ) : null
+                        )}
+                      </ul>
                     </div>
                   ))}
             </div>
           </div>
           <div>
-            <h3>all tokens</h3>
-            <div>
-              {Object.keys(allTokens).length === 0
-                ? 'none'
-                : Object.keys(allTokens).map(gameid => (
-                    <div key={gameid}>
-                      <h4>
-                        <a data-gameid={gameid} onClick={handleGameClick}>
-                          game {gameid}
-                        </a>
-                      </h4>
-                      <div>
-                        {Object.keys(allTokens[gameid]).map(userid => (
-                          <div key={userid}>
-                            {userid.slice(0, 4)}
-                            …: {allTokens[gameid][userid].black} black,{' '}
-                            {allTokens[gameid][userid].white} white
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-            </div>
-          </div>
-          <div>
-            <h3>some available games</h3>
-            <div>
+            <h3>Some available games</h3>
+            <ul>
               {gamesList.map(game => (
-                <div key={game.id}>
+                <li key={game.id}>
                   <a data-gameid={game.id} onClick={handleGameClick}>
                     {game.white.username} x {game.black.username}
                   </a>{' '}
@@ -211,40 +183,47 @@ function App() {
                     spacer: ''
                   })}{' '}
                   per move
-                </div>
+                </li>
               ))}
-            </div>
+              <a href="https://online-go.com/observe-games" target="_blank">
+                more…
+              </a>
+            </ul>
           </div>
         </div>
         <div id="user">
           <h2>Your stuff</h2>
           <div>
-            <h4>your tokens</h4>
-            {userTokens.length === 0
-              ? 'none'
-              : userTokens.map(({amount, gameid, winner}, i) => (
-                  <div key={i}>
-                    {amount} on {winner}@
-                    <a data-gameid={gameid} onClick={handleGameClick}>
-                      {gameid}
-                    </a>{' '}
-                  </div>
-                ))}
+            <h3>Your tokens</h3>
+            <ul>
+              {userTokens.length === 0
+                ? 'none'
+                : userTokens.map(({amount, gameid, winner}, i) => (
+                    <li key={i}>
+                      {amount} on {winner}@
+                      <a data-gameid={gameid} onClick={handleGameClick}>
+                        {gameid}
+                      </a>{' '}
+                    </li>
+                  ))}
+            </ul>
           </div>
           <div>
-            <h4>your offers</h4>
-            {userOffers.length === 0
-              ? 'none'
-              : userOffers.map(({amount, gameid, winner, price}, i) => (
-                  <div key={i}>
-                    {amount} on {winner}@
-                    <a data-gameid={gameid} onClick={handleGameClick}>
-                      {gameid}
-                    </a>{' '}
-                    at {price}
-                    sats
-                  </div>
-                ))}
+            <h3>Your offers</h3>
+            <ul>
+              {userOffers.length === 0
+                ? 'none'
+                : userOffers.map(({amount, gameid, winner, price}, i) => (
+                    <li key={i}>
+                      {amount} on {winner}@
+                      <a data-gameid={gameid} onClick={handleGameClick}>
+                        {gameid}
+                      </a>{' '}
+                      at {price}
+                      sats
+                    </li>
+                  ))}
+            </ul>
           </div>
           <div>
             <h4>Disclaimer</h4>
