@@ -78,7 +78,7 @@ function App() {
 
     ws.onopen = () => {
       ws.send(
-        '420["gamelist/query",{"list":"corr","sort_by":"rank","from":-9,"limit":9}]'
+        '420["gamelist/query",{"list":"corr","sort_by":"rank","from":-9,"limit":12}]'
       )
     }
   }, [])
@@ -132,7 +132,6 @@ function App() {
             the player you think will lose (for less than 10 satoshis). You can
             also just buy tokens from others instead of opening new bets.
           </p>
-          <h2>Global stuff</h2>
           <div>
             <h3>All offers</h3>
             <div>
@@ -151,7 +150,6 @@ function App() {
                             allOffers[gameid][winner] &&
                             allOffers[gameid][winner].length !== 0 ? (
                               <>
-                                <h5>{winner}</h5>
                                 {allOffers[gameid][winner].map(
                                   ({amount, price, seller}, i) => (
                                     <li key={i}>
@@ -159,7 +157,7 @@ function App() {
                                       sats from {seller.slice(0, 4)}…
                                     </li>
                                   )
-                                )}{' '}
+                                )}
                               </>
                             ) : null
                         )}
@@ -192,7 +190,6 @@ function App() {
           </div>
         </div>
         <div id="user">
-          <h2>Your stuff</h2>
           <div>
             <h3>Your tokens</h3>
             <ul>
