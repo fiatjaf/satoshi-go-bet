@@ -60,6 +60,8 @@ export default function Game({
   useEffect(
     () => {
       setAction({action: NONE})
+      setGameData(null)
+      setContractGameData(null)
     },
     [selectedGame]
   )
