@@ -140,3 +140,31 @@ assert state['balances'] == {id1: 7 + 4*9 + 5*1 + 5*1 + 6*4 + 1*10 + 4*10,
                              id2: 43 - (4*9 + 5*1) + 200 - (5*1 + 6*4) - 10 + 15*10}
 assert state['offers'] == {}
 assert state['tokens'] == {}
+
+# enter two new users for a new test on a different game
+key3, id3 = make_user()
+key4, id4 = make_user()
+gameid = '8888888888888'
+
+print('make bet an place offer')
+payload = json.dumps({'gameid': gameid, 'userid': id3})
+r = !(run --contract contract.lua --method newbet --payload @(payload) --state @(jsonstate) --satoshis 100 --http @(gamerunning))
+after(r)
+payload = json.dumps({'gameid': gameid, 'userid': id3, '_key': key3, 'amount': 10, 'price': 9, 'winner': 'black'})
+r = !(run --contract contract.lua --method selloffer --payload @(payload) --state @(jsonstate) --http @(gamerunning))
+after(r)
+assert state['balances'].get(id3, 0) == 0
+assert state['balances'].get(id4, 0) == 0
+assert state['tokens'][gameid]['white'][id3] == 10
+assert state['tokens'][gameid]['black'][id3] == 0
+assert state['offers'][gameid]['black'][0] == {'seller': id3, 'amount': 10, 'price': 9}
+
+print('buy 8 of the tokens with the other user -- should have a remainder of 4')
+payload = json.dumps({'gameid': gameid, 'userid': id4, 'maxprice': 9, 'winner': 'black'})
+r = !(run --contract contract.lua --method buyoffer --payload @(payload) --state @(jsonstate) --satoshis=76 --http @(gamerunning))
+after(r)
+assert state['offers'][gameid]['black'][0] == {'seller': id3, 'amount': 2, 'price': 9}
+assert state['tokens'][gameid]['black'][id3] == 0
+assert state['tokens'][gameid]['black'][id4] == 8
+assert state['balances'][id3] == 72
+assert state['balances'][id4] == 4
