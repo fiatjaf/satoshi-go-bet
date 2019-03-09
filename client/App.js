@@ -152,7 +152,7 @@ function App() {
                               <>
                                 {allOffers[gameid][winner].map(
                                   ({amount, price, seller}, i) => (
-                                    <li key={i}>
+                                    <li key={`${i}-{winner}`}>
                                       {amount} for {winner} at {price}
                                       sats from {seller.slice(0, 4)}…
                                     </li>

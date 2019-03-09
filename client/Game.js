@@ -297,7 +297,7 @@ export default function Game({
                   <div>
                     winner: <b>{gameData.winner}</b>
                   </div>
-                  {Object.keys(gameData.tokens).length ||
+                  {Object.keys(contractGameData.tokens).length ||
                   constractGameData.offers.black.length ||
                   constractGameData.offers.white.length ? (
                     <button onClick={handleRedeem}>redeem tokens</button>
