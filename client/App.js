@@ -3,6 +3,7 @@
 import React, {useState, useEffect} from 'react'
 import {render} from 'react-dom'
 import humanizeDuration from 'humanize-duration'
+import debounce from 'just-debounce-it'
 
 import user from './user'
 import * as toast from './toast'
@@ -43,6 +44,7 @@ function App() {
   let [selectedGame, setSelectedGame] = useState(
     sessionStorage.getItem('gameid') || ''
   )
+  let [debouncedSelectedGame, setDebouncedSelectedGame] = useState('')
   let [showingInvoice, showInvoice] = useState(null)
   let [showingPasteInvoice, showPasteInvoice] = useState(null)
   let [gamesList, setGamesList] = useState([])
@@ -56,6 +58,13 @@ function App() {
   useEffect(() => {
     loadContract().then(setContractState)
   }, [])
+
+  useEffect(
+    debounce(() => {
+      setDebouncedSelectedGame(selectedGame)
+    }, 1000),
+    [selectedGame]
+  )
 
   useEffect(() => {
     if (gamesList.length > 0) return // only fetch this once ever
@@ -85,7 +94,7 @@ function App() {
 
   async function handleGameClick(e) {
     e.preventDefault()
-    setSelectedGame(e.target.dataset.gameid)
+    setDebouncedSelectedGame(e.target.dataset.gameid)
   }
 
   async function handleWithdraw(e) {
@@ -120,6 +129,7 @@ function App() {
         <Game
           selectedGame={selectedGame}
           setSelectedGame={setSelectedGame}
+          debouncedSelectedGame={debouncedSelectedGame}
           contractState={contractState}
           showInvoice={showInvoice}
           setContractState={setContractState}

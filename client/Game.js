@@ -1,7 +1,6 @@
 /** @format */
 
 import React, {useState, useEffect} from 'react'
-import {useDebounce} from 'use-debounce'
 import Goban from 'react-goban-svg'
 import clone from 'just-clone'
 import get from 'just-safe-get'
@@ -39,6 +38,7 @@ const NONE = 'NONE'
 export default function Game({
   selectedGame,
   setSelectedGame,
+  debouncedSelectedGame,
   contractState,
   setContractState,
   showInvoice
@@ -47,7 +47,6 @@ export default function Game({
   let [gameData, setGameData] = useState()
   let [contractGameData, setContractGameData] = useState({})
   let [loading, setLoading] = useState(false)
-  let [debouncedSelectedGame] = useDebounce(selectedGame, 3000)
   let currentGameId = useComputed(debouncedSelectedGame, getGameId)
 
   useEffect(
@@ -298,8 +297,8 @@ export default function Game({
                     winner: <b>{gameData.winner}</b>
                   </div>
                   {Object.keys(contractGameData.tokens).length ||
-                  constractGameData.offers.black.length ||
-                  constractGameData.offers.white.length ? (
+                  contractGameData.offers.black.length ||
+                  contractGameData.offers.white.length ? (
                     <button onClick={handleRedeem}>redeem tokens</button>
                   ) : null}
                   <br />
