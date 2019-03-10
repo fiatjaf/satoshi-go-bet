@@ -382,6 +382,7 @@ export default function Game({
                           type="number"
                           step="10"
                           min="10"
+                          defaultValue="100"
                         />
                       </label>
                       <button>bet</button>
@@ -421,7 +422,11 @@ export default function Game({
                                     step="1"
                                     min="1"
                                     max="9"
-                                    defaultValue="9"
+                                    defaultValue={
+                                      contractGameData.offers[winner].slice(
+                                        -1
+                                      )[0].price
+                                    }
                                   />
                                 </label>
                                 <label>
@@ -431,6 +436,13 @@ export default function Game({
                                     type="number"
                                     name="satoshis"
                                     min="1"
+                                    defaultValue={
+                                      9 *
+                                      contractGameData.offers[winner].reduce(
+                                        (acc, o) => acc + o.amount,
+                                        0
+                                      )
+                                    }
                                   />
                                 </label>
                                 <button>send buy order</button>
