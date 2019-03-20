@@ -36,7 +36,7 @@ const BUYING_OFFER_FOR = 'BUYING_OFFER_FOR'
 const NONE = 'NONE'
 
 export default function Game({
-  selectedGame,
+  selectedGame = '',
   setSelectedGame,
   debouncedSelectedGame,
   contractState,

@@ -104,7 +104,11 @@ function App() {
         'withdraw',
         0,
         {userid: user.id, _key: user.key},
-        {showInvoice, showPasteInvoice, invoiceAt: '_invoice'}
+        {
+          showInvoice,
+          showPasteInvoice,
+          invoiceAt: '_invoice'
+        }
       )
       toast.success(`Withdraw queued successfully.`)
       setContractState(await loadContract())
@@ -114,7 +118,9 @@ function App() {
   return (
     <div>
       {showingInvoice ? <Invoice {...showingInvoice} /> : null}
-      {showingPasteInvoice ? <PasteInvoice {...showingPasteInvoice} /> : null}
+      {showingPasteInvoice ? (
+        <PasteInvoice maximum={userBalance} {...showingPasteInvoice} />
+      ) : null}
       <nav>
         <div className="header">Satoshi Go Bet</div>
         <div className="user-id">{user.id}</div>
@@ -253,5 +259,9 @@ function App() {
 
 window.etleneum = process.env.ETLENEUM_URL
 window.contract = process.env.CONTRACT_ID
+
+try {
+  window.webln.enable()
+} catch (e) {}
 
 render(<App />, document.getElementById('app'))

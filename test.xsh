@@ -1,8 +1,6 @@
-import sys
 import uuid
 import json
 import hashlib
-import subprocess
 
 aliases['run'] = $HOME + '/comp/go/src/github.com/fiatjaf/etleneum/runcall'
 def make_user():

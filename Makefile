@@ -1,5 +1,8 @@
 all: static/bundle.js static/style.css
 
+deploy: prod
+	netlify deploy --prod -d static/
+
 prod: $(shell find . -name "*.go") static/bundle.min.js static/style.min.css
 	mv static/bundle.min.js static/bundle.js
 	mv static/style.min.css static/style.css

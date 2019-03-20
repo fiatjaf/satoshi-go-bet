@@ -1,8 +1,8 @@
 /** @format */
 
-import React from 'react'
+import React, {useEffect} from 'react'
 
-export default function PasteInvoice({onPasted, hide}) {
+export default function PasteInvoice({onPasted, hide, maximum}) {
   function handlePasted(e) {
     e.preventDefault()
     onPasted(e.target.invoice.value)
@@ -12,6 +12,20 @@ export default function PasteInvoice({onPasted, hide}) {
     e.preventDefault()
     hide()
   }
+
+  useEffect(() => {
+    try {
+      window.webln
+        .makeInvoice({
+          maximumAmount: maximum,
+          defaultAmount: maximum,
+          defaultMemo: 'withdraw from satoshi-go-bet'
+        })
+        .then(({paymentRequest: invoice}) => {
+          onPasted(invoice)
+        })
+    } catch (e) {}
+  }, [])
 
   return (
     <div id="paste-invoice">
