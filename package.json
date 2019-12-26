@@ -26,7 +26,6 @@
     "uglifyify": "^5.0.1"
   },
   "dependencies": {
-    "browserify-incremental": "^3.1.1",
     "humanize-duration": "^3.17.0",
     "just-clone": "^3.1.0",
     "just-debounce-it": "^1.1.0",
